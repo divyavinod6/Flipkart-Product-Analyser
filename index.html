@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Product URL Input</title>
+  </head>
+  <body>
+    <h1>Enter Product URL</h1>
+    <form id="urlForm">
+      <label for="productUrl">Product URL:</label>
+      <input type="text" id="productUrl" name="productUrl" required />
+      <button type="submit">Submit</button>
+    </form>
+    <div id="app">
+      <!-- The product information will be displayed here -->
+    </div>
+
+    <script>
+      document
+        .getElementById('urlForm')
+        .addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const productUrl = document.getElementById('productUrl').value;
+
+          // Display a loading message
+          const app = document.getElementById('app');
+          app.innerHTML = '<p>Loading...</p>';
+
+          // Fetch product data from the server and update the SPA
+          fetch('/process-url', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ my_url: productUrl }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Update the SPA with the product information
+              app.innerHTML = `
+                <h2>Product Name:</h2>
+                <p>${data.prod_data[0]}</p>
+
+                <h2>Product Image:</h2>
+                <img src="${data.prod_data[1]}" alt="Product Image" />
+
+                <h2>Summary:</h2>
+                <p>${data.rev_summary}</p>
+
+                <h2>Sentiment Scores:</h2>
+                <ul>
+                  <li>Positive Score: ${data.rev_sentiment[0].score}</li>
+                  <li>Neutral Score: ${data.rev_sentiment[1].score}</li>
+                  <li>Negative Score: ${data.rev_sentiment[2].score}</li>
+                </ul>
+              `;
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+              // Handle errors if needed
+            });
+        });
+    </script>
+  </body>
+</html>
